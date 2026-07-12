@@ -58,6 +58,56 @@ const TourPackageSchema = new mongoose.Schema({
         type: [String],
         default: []
     },
+    packingList: { type: [String], default: [] },
+    flightPackage: { type: [String], default: [] },
+    termsAndConditions: { type: [String], default: [] },
+    knowBeforeYouBook: { type: [String], default: [] },
+    attractions: [{
+        name: { type: String },
+        description: { type: String },
+        image: { type: String }
+    }],
+    departures: [{
+        startDate: { type: Date, required: true },
+        endDate: { type: Date, required: true },
+        price: { type: Number, required: true },
+        status: { type: String, enum: ['Available', 'Filling Fast', 'Sold Out'], default: 'Available' }
+    }],
+    preBookAmount: {
+        type: Number,
+        default: 0
+    },
+    // --- GROUP TRIP FIELDS ---
+    startingLocations: [{
+        name: { type: String },
+        duration: { type: String },
+        basePrice: { type: Number },
+        travelOptions: [{
+            name: { type: String },
+            priceDiff: { type: Number }
+        }],
+        itinerary: [{ type: String }],
+        departures: [{
+            startDate: { type: Date },
+            endDate: { type: Date },
+            price: { type: Number },
+            status: { type: String, enum: ['Available', 'Filling Fast', 'Sold Out'], default: 'Available' }
+        }]
+    }],
+    roomSharing: [{
+        name: { type: String },
+        priceDiff: { type: Number }
+    }],
+    // --- TOUR PACKAGE (PRIVATE) FIELDS ---
+    packageOptions: [{
+        title: { type: String, required: true },
+        image: { type: String, default: 'no-photo.jpg' },
+        prices: [{
+            groupSize: { type: String, required: true },
+            originalPrice: { type: Number, required: true },
+            discountedPrice: { type: Number, required: true }
+        }]
+    }],
     createdAt: {
         type: Date,
         default: Date.now

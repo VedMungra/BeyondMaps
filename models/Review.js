@@ -11,6 +11,10 @@ const ReviewSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Please add some comments']
     },
+    photos: {
+        type: [String],
+        default: []
+    },
     tourPackage: {
         type: mongoose.Schema.ObjectId,
         ref: 'TourPackage',

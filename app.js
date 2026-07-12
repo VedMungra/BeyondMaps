@@ -44,6 +44,9 @@ app.use('/api/v1/users', userAuthRoutes); // Customer Auth
 app.use('/api/v1/tours', tourRoutes);
 app.use('/api/v1/inquiries', inquiryRoutes);
 app.use('/api/v1/reviews', reviewRoutes);
+app.use('/api/v1/amenities', require('./routes/amenities'));
+
+// Error Handler Middleware
 
 // 404 Handler
 app.use((req, res, next) => {

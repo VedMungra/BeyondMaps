@@ -26,6 +26,11 @@ exports.getReviews = asyncHandler(async (req, res, next) => {
 // @access  Public (or Private depending on user model)
 exports.addReview = asyncHandler(async (req, res, next) => {
     req.body.tourPackage = req.params.tourId;
+
+    if (req.files && req.files.length > 0) {
+        req.body.photos = req.files.map(file => file.filename);
+    }
+
     const review = await Review.create(req.body);
     res.status(201).json({ success: true, data: review });
 });

@@ -8,7 +8,8 @@ const storage = multer.diskStorage({
         cb(null, './public/uploads');
     },
     filename: function (req, file, cb) {
-        cb(null, `photo_${req.params.id}_${Date.now()}${path.extname(file.originalname)}`);
+        const idStr = req.params.id || req.params.tourId || 'upload';
+        cb(null, `photo_${idStr}_${Date.now()}${path.extname(file.originalname)}`);
     }
 });
 

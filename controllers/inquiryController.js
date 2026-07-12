@@ -26,7 +26,7 @@ exports.createInquiry = asyncHandler(async (req, res, next) => {
 // @access  Private (Admin)
 exports.updateInquiry = asyncHandler(async (req, res, next) => {
     const inquiry = await Inquiry.findByIdAndUpdate(req.params.id, req.body, {
-        new: true,
+        returnDocument: 'after',
         runValidators: true
     });
     if (!inquiry) {

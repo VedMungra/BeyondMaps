@@ -26,7 +26,18 @@ const TourSection = ({ title, tours, loading }) => {
                     className="tour-img"
                     onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1527631746610-bca00a040d60?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' }}
                   />
-                  <div className="badge-duration">{tour.duration}</div>
+                  <div className="badge-duration">
+                    {(() => {
+                      const dur = tour.duration || '';
+                      if (dur.toLowerCase().includes('night')) return dur;
+                      const m = dur.match(/(\d+)/);
+                      if (m) {
+                        const d = parseInt(m[1], 10);
+                        if (d > 0) return `${d} Days ${d - 1} Nights`;
+                      }
+                      return dur;
+                    })()}
+                  </div>
                 </div>
 
                 <div className="tour-info">
@@ -92,8 +103,8 @@ export default function Home({ category }) {
 
   // Filter tours into the 3 sections
   const trendingTours = tours.filter(t => t.isTrending)
-  const domesticTours = tours.filter(t => t.region === 'Domestic' && !t.isTrending)
-  const internationalTours = tours.filter(t => t.region === 'International' && !t.isTrending)
+  const domesticTours = tours.filter(t => t.region === 'Domestic')
+  const internationalTours = tours.filter(t => t.region === 'International')
 
   // Determine prefix based on active category
   const prefix = category ? `${category}: ` : ''
@@ -115,8 +126,8 @@ export default function Home({ category }) {
 
       {/* Render the 3 sections dynamically */}
       <TourSection title={`${prefix}Trending`} tours={trendingTours} loading={loading} />
-      <TourSection title={`${prefix}Domestic Maps`} tours={domesticTours} loading={loading} />
-      <TourSection title={`${prefix}International Maps`} tours={internationalTours} loading={loading} />
+      <TourSection title={`${prefix}Domestic Destinations`} tours={domesticTours} loading={loading} />
+      <TourSection title={`${prefix}International Destinations`} tours={internationalTours} loading={loading} />
     </>
   )
 }

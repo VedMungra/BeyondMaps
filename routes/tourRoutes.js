@@ -1,5 +1,5 @@
 const express = require('express');
-const { getTours, getTour, createTour, updateTour, deleteTour, tourPhotoUpload, tourGalleryUpload } = require('../controllers/tourController');
+const { getTours, getTour, createTour, updateTour, deleteTour, tourPhotoUpload, tourGalleryUpload, tourPackageOptionPhotoUpload } = require('../controllers/tourController');
 const upload = require('../middleware/upload');
 const TourPackage = require('../models/TourPackage');
 const advancedResults = require('../middleware/advancedResults');
@@ -32,5 +32,9 @@ router
 router
     .route('/:id/gallery')
     .put(protect, upload.array('files', 5), tourGalleryUpload);
+
+router
+    .route('/:id/package-option/:optionIndex/photo')
+    .put(protect, upload.single('file'), tourPackageOptionPhotoUpload);
 
 module.exports = router;

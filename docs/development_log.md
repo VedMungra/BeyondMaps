@@ -197,5 +197,42 @@ This document serves as a comprehensive log of all the steps we have taken so fa
   - **Admin UI:** Added a native multi-file selector to the `AdminDashboard.jsx` allowing up to 5 bulk image uploads alongside the primary cover photo.
   - **Frontend UI:** Configured `TourDetails.jsx` to dynamically render a CSS-Grid masonry layout exactly matching the requested design if a trip contains 5 gallery photos.
 
+## 26. Dynamic Tour Inclusions, Exclusions & Amenities
+- **Action:** Upgraded the Tour Details page and CMS to support highly customizable, dynamic inclusions and amenities for every individual trip.
+- **Details:**
+  - **Database:** Expanded the `TourPackage` schema to include `amenities` (Array of Strings), `inclusions` (Array of Strings), and `exclusions` (Array of Strings).
+  - **Admin UI:** Upgraded the "Create/Edit Tour" form in `AdminDashboard.jsx` to include a master checklist of 12 customizable amenities (Stay, Meals, Volvo Bus, Bike & Fuel, etc.) and multi-line text areas for bespoke Inclusions and Exclusions.
+  - **Frontend Rendering:** Upgraded `TourDetails.jsx` to dynamically map selected `amenities` to their respective custom SVG icons (coffee cups, buses, planes, etc.) in the "What's Included" hero box.
+  - **Frontend UI:** Added visually distinct, beautifully stacked Inclusions (styled with green checkmarks) and Exclusions (styled with red crosses) cards rendered immediately below the daily itinerary.
+
+## 27. Dynamic Quick Info Section
+- **Action:** Upgraded the Tour Details page to include a fully dynamic "Quick Info" modal section (Packing List, Flight Package, Terms, Know Before You Book).
+- **Details:**
+  - **Database:** Added `packingList`, `flightPackage`, `termsAndConditions`, and `knowBeforeYouBook` array fields to the `TourPackage` model.
+  - **Admin UI:** Added 4 new textareas in the Admin Dashboard (right below Inclusions and Exclusions) to allow line-by-line custom data entry for each tour.
+  - **Frontend UI:** Built a dynamic Quick Info modal at the bottom of `TourDetails.jsx` that intelligently renders buttons only if data exists for that specific tour. Fixed an associated React crash caused by legacy hardcoded data references.
+  - **Admin Bug Fix:** Fixed an issue where the `attractions` array was wiped out when clicking "Edit" on an existing tour.
+
+## 28. Right Sticky Sidebar Improvements
+- **Action:** Enhanced the Tour Details right-hand sticky sidebar with contact and quick action cards.
+- **Details:**
+  - Added a "Private Trips Available" card highlighting group sizes and a "Request a Callback" trigger.
+  - Added a "Quick Actions" card featuring side-by-side "Whatsapp" and "Get PDF" buttons.
+  - Wrapped all cards (including pricing) into a responsive, cohesive sticky flex container to ensure smooth synchronized scrolling.
+
+## 29. Backend Modernization & Fixes
+- **Action:** Resolved Mongoose deprecation warnings and cleaned up aborted AI integrations.
+- **Details:**
+  - Upgraded all backend `findByIdAndUpdate` calls in `tourController.js` and `inquiryController.js` from `{ new: true }` to `{ returnDocument: 'after' }` to eliminate Mongoose terminal warnings.
+  - Cleaned up and resolved a Vite parsing error (invalid Unicode escape sequence) in `AdminDashboard.jsx`.
+  - Removed aborted AI/LLM integration (Tavily search, etc.) upon user request to proceed with a manual approach.
+
+## 30. Customer Review Photo Uploads (2x2 Grid)
+- **Action:** Upgraded the Customer Review system to accept and display up to 4 user-uploaded photos in a styled masonry grid.
+- **Details:**
+  - **Backend Schema & API:** Upgraded the `Review.js` model to support a `photos` array. Integrated Multer `upload.array('photos', 4)` directly into the Review POST route, dynamically generating unique filenames and storing uploaded files securely in `/public/uploads`.
+  - **Frontend Submission Form:** Transformed the static JSON review form in `TourDetails.jsx` into a dynamic `FormData` submission, complete with a multi-file selector capped at 4 images.
+  - **2x2 Masonry Grid UI:** The Customer Reviews feed now dynamically detects attached photos and renders them in a sleek, responsive 2x2 image grid identically matching the Avian Experiences design system.
+
 ## Project Status: 🚀 MVP Complete!
 The Travel Agency platform is fully functional. It possesses a robust Node.js/MongoDB backend and a premium, responsive React frontend tailored to the Avian Experiences design aesthetic. It includes full CMS management, Lead Generation, Customer Reviews, Phone-based Customer Authentication, and a custom Destinations Bar.
