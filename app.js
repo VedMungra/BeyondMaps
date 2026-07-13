@@ -32,13 +32,7 @@ app.use((req, res, next) => {
 // Set security headers
 app.use(helmet());
 
-// Enable CORS for frontend integration
-const corsOptions = {
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-    optionsSuccessStatus: 200,
-    credentials: true // Important if using cookies/sessions
-};
-app.use(cors(corsOptions));
+app.use(cors());
 
 // Set static folder
 app.use(express.static(path.join(__dirname, 'public')));
