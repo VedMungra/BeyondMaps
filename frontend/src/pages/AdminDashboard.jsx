@@ -269,7 +269,7 @@ export default function AdminDashboard() {
 
     try {
       const token = localStorage.getItem('adminToken')
-      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/amenities', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/amenities`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -299,7 +299,7 @@ export default function AdminDashboard() {
 
     const fetchData = async () => {
       try {
-        const leadsRes = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/inquiries', {
+        const leadsRes = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/inquiries`, {
           headers: { Authorization: `Bearer ${token}` }
         })
         const leadsData = await leadsRes.json()
@@ -311,13 +311,13 @@ export default function AdminDashboard() {
           return
         }
 
-        const toursRes = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/tours')
+        const toursRes = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/tours`)
         const toursData = await toursRes.json()
         if (toursData.success) {
           setTours(toursData.data)
         }
 
-        const amenitiesRes = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/amenities')
+        const amenitiesRes = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/amenities`)
         const amenitiesData = await amenitiesRes.json()
         if (amenitiesData.success) {
           setGlobalAmenities(amenitiesData.data)
@@ -431,7 +431,7 @@ export default function AdminDashboard() {
         setEditingTourId(null)
 
         // Refresh tours
-        const toursRes = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/tours')
+        const toursRes = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/tours`)
         const toursData = await toursRes.json()
         if (toursData.success) setTours(toursData.data)
 

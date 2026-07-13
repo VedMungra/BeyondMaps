@@ -41,7 +41,7 @@ export default function TourDetails() {
           setReviews(reviewData.data)
         }
 
-        const amenitiesRes = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/amenities')
+        const amenitiesRes = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/amenities`)
         const amenitiesData = await amenitiesRes.json()
         if (amenitiesData.success) {
           setGlobalAmenities(amenitiesData.data)
@@ -68,7 +68,7 @@ export default function TourDetails() {
     setSubmitError('')
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/inquiries', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || ''}/api/v1/inquiries`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...formData, tourPackage: id })
