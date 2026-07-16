@@ -16,7 +16,7 @@ router.use('/:tourId/reviews', reviewRouter);
 
 router
     .route('/')
-    .get(advancedResults(TourPackage), getTours)
+    .get(advancedResults(TourPackage, 'location'), getTours)
     .post(protect, createTour);
 
 router

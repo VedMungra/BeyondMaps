@@ -4,11 +4,14 @@ import { useNavigate } from 'react-router-dom'
 export default function AdminDashboard() {
   const navigate = useNavigate()
   const [leads, setLeads] = useState([])
+  const [users, setUsers] = useState([])
   const [tours, setTours] = useState([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState('manage') // 'leads', 'manage', 'tours'
+  const [activeTab, setActiveTab] = useState('manage') // 'leads', 'manage', 'tours', 'locations', 'users'
   const [editingTourId, setEditingTourId] = useState(null)
   const UPLOAD_URL = `/uploads/`
+  const [locations, setLocations] = useState([])
+  const [newLocationName, setNewLocationName] = useState('')
 
   // Tour Form State
   const [newTour, setNewTour] = useState({
@@ -28,6 +31,7 @@ export default function AdminDashboard() {
     attractions: [],
     category: 'Tour Package',
     region: 'Domestic',
+    location: '',
     isTrending: false
   })
   const [tourPhoto, setTourPhoto] = useState(null)
@@ -290,6 +294,48 @@ export default function AdminDashboard() {
     }
   }
 
+  const handleLocationAdd = async (e) => {
+    e.preventDefault();
+    if (!newLocationName.trim()) return;
+    try {
+      const token = localStorage.getItem('adminToken')
+      const res = await fetch('/api/v1/locations', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ name: newLocationName.trim() })
+      })
+      const data = await res.json()
+      if (data.success) {
+        setLocations([...locations, data.data])
+        setNewLocationName('')
+      } else {
+        alert(data.error || 'Failed to add location')
+      }
+    } catch (err) {
+      alert('Network error')
+    }
+  }
+
+  const handleLocationDelete = async (id) => {
+    if (!window.confirm('Are you sure?')) return;
+    try {
+      const token = localStorage.getItem('adminToken')
+      const res = await fetch(`/api/v1/locations/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      const data = await res.json()
+      if (data.success) {
+        setLocations(locations.filter(l => l._id !== id))
+      }
+    } catch (err) {
+      alert('Network error')
+    }
+  }
+
   useEffect(() => {
     const token = localStorage.getItem('adminToken')
     if (!token) {
@@ -311,6 +357,14 @@ export default function AdminDashboard() {
           return
         }
 
+        const usersRes = await fetch('/api/v1/users', {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        const usersData = await usersRes.json()
+        if (usersData.success) {
+          setUsers(usersData.data)
+        }
+
         const toursRes = await fetch('/api/v1/tours')
         const toursData = await toursRes.json()
         if (toursData.success) {
@@ -321,6 +375,12 @@ export default function AdminDashboard() {
         const amenitiesData = await amenitiesRes.json()
         if (amenitiesData.success) {
           setGlobalAmenities(amenitiesData.data)
+        }
+
+        const locationsRes = await fetch('/api/v1/locations')
+        const locationsData = await locationsRes.json()
+        if (locationsData.success) {
+          setLocations(locationsData.data)
         }
 
       } catch (err) {
@@ -482,6 +542,7 @@ export default function AdminDashboard() {
       attractions: tour.attractions || [],
       category: tour.category || 'Tour Package',
       region: tour.region || 'Domestic',
+      location: tour.location ? tour.location._id : '',
       isTrending: tour.isTrending || false
     })
     setEditingTourId(tour._id)
@@ -517,13 +578,15 @@ export default function AdminDashboard() {
         <button onClick={handleLogout} className="btn btn-outline">Log Out</button>
       </div>
 
-      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
         <button className={activeTab === 'manage' ? 'btn btn-primary' : 'btn btn-outline'} onClick={() => setActiveTab('manage')}>Manage Tours</button>
+        <button className={activeTab === 'locations' ? 'btn btn-primary' : 'btn btn-outline'} onClick={() => setActiveTab('locations')}>Manage Locations</button>
         <button className={activeTab === 'leads' ? 'btn btn-primary' : 'btn btn-outline'} onClick={() => setActiveTab('leads')}>View Leads</button>
+        <button className={activeTab === 'users' ? 'btn btn-primary' : 'btn btn-outline'} onClick={() => setActiveTab('users')}>Registered Users</button>
         <button className={activeTab === 'tours' ? 'btn btn-primary' : 'btn btn-outline'} onClick={() => {
           setActiveTab('tours')
           setEditingTourId(null)
-          setNewTour({ title: '', description: '', price: '', duration: '', itinerary: [''], inclusions: '', exclusions: '', amenities: [], departures: [], preBookAmount: 0, startingLocations: [], travelOptions: [], roomSharing: [], pricingByGroupSize: [], hotelCategories: [], category: 'Tour Package', region: 'Domestic', isTrending: false })
+          setNewTour({ title: '', description: '', price: '', duration: '', itinerary: [''], inclusions: '', exclusions: '', packingList: '', flightPackage: '', termsAndConditions: '', knowBeforeYouBook: '', amenities: [], departures: [], preBookAmount: 0, startingLocations: [], roomSharing: [], packageOptions: [], attractions: [], category: 'Tour Package', region: 'Domestic', location: '', isTrending: false })
           setMessage('')
         }}>Create Tour</button>
       </div>
@@ -603,6 +666,52 @@ export default function AdminDashboard() {
         </div>
       )}
 
+      {activeTab === 'users' && (
+        <div style={{ background: 'var(--bg-primary)', padding: '2rem', borderRadius: 'var(--radius-card)', border: 'var(--border-light)' }}>
+          <h3 style={{ marginBottom: '1.5rem' }}>Registered Users (Travelers)</h3>
+          <div style={{ overflowX: 'auto' }}>
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Join Date</th>
+                  <th>Phone Number</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.length === 0 ? (
+                  <tr><td colSpan="2" style={{ textAlign: 'center' }}>No users found.</td></tr>
+                ) : (
+                  users.map(user => (
+                    <tr key={user._id}>
+                      <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+                      <td style={{ fontWeight: 600, color: 'var(--accent-primary)' }}>{user.phone}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'locations' && (
+        <div style={{ background: 'var(--bg-primary)', padding: '2rem', borderRadius: 'var(--radius-card)', border: 'var(--border-light)' }}>
+          <h3 style={{ marginBottom: '1.5rem' }}>Manage Locations</h3>
+          <form onSubmit={handleLocationAdd} style={{ display: 'flex', gap: '1rem', marginBottom: '2rem' }}>
+            <input type="text" className="form-control" placeholder="New Location Name (e.g. Dubai)" value={newLocationName} onChange={e => setNewLocationName(e.target.value)} required />
+            <button type="submit" className="btn btn-primary" style={{ whiteSpace: 'nowrap' }}>Add Location</button>
+          </form>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+            {locations.map(loc => (
+              <div key={loc._id} style={{ padding: '1rem', border: 'var(--border-light)', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>{loc.name}</span>
+                <button onClick={() => handleLocationDelete(loc._id)} style={{ background: 'none', border: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: '1.2rem' }}>&times;</button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {activeTab === 'tours' && (
         <div style={{ background: 'var(--bg-primary)', padding: '2rem', borderRadius: 'var(--radius-card)', border: 'var(--border-light)', maxWidth: '800px' }}>
           <h3 style={{ marginBottom: '1.5rem' }}>{editingTourId ? 'Edit Tour' : 'Create New Tour'}</h3>
@@ -637,8 +746,18 @@ export default function AdminDashboard() {
               <div className="form-group" style={{ flex: 1 }}>
                 <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Region</label>
                 <select name="region" className="form-control" value={newTour.region} onChange={handleInputChange}>
-                  <option value="Domestic">Domestic Maps</option>
-                  <option value="International">International Maps</option>
+                  <option value="Domestic">Domestic</option>
+                  <option value="International">International</option>
+                </select>
+              </div>
+
+              <div className="form-group" style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Location (Optional)</label>
+                <select name="location" className="form-control" value={newTour.location} onChange={handleInputChange}>
+                  <option value="">No Location</option>
+                  {locations.map(loc => (
+                    <option key={loc._id} value={loc._id}>{loc.name}</option>
+                  ))}
                 </select>
               </div>
 
@@ -656,6 +775,24 @@ export default function AdminDashboard() {
             <div className="form-group">
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 600 }}>Description</label>
               <textarea name="description" className="form-control" rows="4" required value={newTour.description} onChange={handleInputChange}></textarea>
+            </div>
+
+            <div className="form-group" style={{ marginBottom: '1.5rem', padding: '1rem', background: 'var(--bg-secondary)', borderRadius: '12px' }}>
+              <label style={{ display: 'block', marginBottom: '1rem', fontWeight: 600 }}>Attractions</label>
+              {(newTour.attractions || []).map((attraction, index) => (
+                <div key={index} style={{ display: 'grid', gridTemplateColumns: '1fr 2fr 1fr auto', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
+                  <input type="text" className="form-control" value={attraction.name} onChange={(e) => handleAttractionChange(index, 'name', e.target.value)} placeholder="Name (e.g. Burj Khalifa)" required style={{ marginBottom: 0 }} />
+                  <input type="text" className="form-control" value={attraction.description} onChange={(e) => handleAttractionChange(index, 'description', e.target.value)} placeholder="Brief description (optional)" style={{ marginBottom: 0 }} />
+                  <input type="text" className="form-control" value={attraction.image} onChange={(e) => handleAttractionChange(index, 'image', e.target.value)} placeholder="Image URL (optional)" style={{ marginBottom: 0 }} />
+                  <button type="button" className="btn btn-outline" style={{ padding: '0.65rem', borderColor: '#ff4d4f', color: '#ff4d4f' }} onClick={() => removeAttraction(index)}>
+                    <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline></svg>
+                  </button>
+                </div>
+              ))}
+              <button type="button" className="btn btn-outline" style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }} onClick={addAttraction}>
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add Attraction
+              </button>
             </div>
 
             {newTour.category !== 'Group Trip' && (

@@ -12,6 +12,10 @@ const TourPackageSchema = new mongoose.Schema({
         required: [true, 'Please add a description'],
         maxlength: [1000, 'Description can not be more than 1000 characters']
     },
+    location: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Location'
+    },
     category: {
         type: String,
         enum: ['Tour Package', 'Group Trip'],

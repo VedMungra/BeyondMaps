@@ -13,7 +13,7 @@ exports.getTours = asyncHandler(async (req, res, next) => {
 // @route   GET /api/v1/tours/:id
 // @access  Public
 exports.getTour = asyncHandler(async (req, res, next) => {
-    const tour = await TourPackage.findById(req.params.id);
+    const tour = await TourPackage.findById(req.params.id).populate('location');
     if (!tour) {
         return next(new ErrorResponse(`Tour not found with id of ${req.params.id}`, 404));
     }

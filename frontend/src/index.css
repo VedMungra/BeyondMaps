@@ -298,25 +298,41 @@ body {
 }
 
 .section-header {
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  justify-content: flex-start;
+  align-items: center;
+}
+.section-header h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
 }
 
-.section-header h2 {
-  font-size: 2.5rem;
-  font-weight: 700;
+.tour-slider-container {
+  position: relative;
+  width: 100%;
 }
 
 .tour-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  display: flex;
   gap: 2.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  padding: 1rem 0 2rem 0; /* Add padding for hover shadow */
+  scroll-behavior: smooth;
+}
+
+.tour-grid::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
 }
 
 /* Tour Card */
 .tour-card {
+  flex: 0 0 calc(33.333% - 1.67rem);
+  scroll-snap-align: start;
   background: var(--bg-primary);
   border-radius: var(--radius-card);
   overflow: hidden;
@@ -327,6 +343,18 @@ body {
   flex-direction: column;
 }
 
+@media (max-width: 1024px) {
+  .tour-card {
+    flex: 0 0 calc(50% - 1.25rem);
+  }
+}
+
+@media (max-width: 768px) {
+  .tour-card {
+    flex: 0 0 100%;
+  }
+}
+
 .tour-card:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow-lg);
@@ -334,12 +362,81 @@ body {
 
 .tour-img-wrapper {
   position: relative;
+  overflow: hidden;
 }
 
 .tour-img {
   width: 100%;
-  height: 240px;
+  height: 280px;
   object-fit: cover;
+  transition: height 0.4s ease;
+}
+
+.tour-card:hover .tour-img {
+  height: 320px;
+}
+
+.card-slider-dots {
+  position: absolute;
+  bottom: 12px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  z-index: 10;
+}
+
+.card-slider-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.card-slider-dot.active {
+  background: #ffffff;
+}
+
+.card-slider-dot:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.card-slider-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  font-size: 1.2rem;
+  color: #000;
+  transition: all 0.2s ease;
+  line-height: 1;
+  padding-bottom: 2px;
+}
+
+.card-slider-btn:hover {
+  background: #ffffff;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.card-slider-btn.prev-btn {
+  left: 8px;
+}
+
+.card-slider-btn.next-btn {
+  right: 8px;
 }
 
 .badge-duration {
@@ -354,51 +451,70 @@ body {
   font-weight: 600;
 }
 
-.tour-info {
-  padding: 2rem;
+/* Avian Card Styles */
+.tour-info-avian {
+  padding: 1rem 1.25rem 1.25rem;
   flex-grow: 1;
   display: flex;
   flex-direction: column;
 }
 
-.tour-title {
-  font-size: 1.4rem;
+.tour-duration-avian {
+  color: #888888;
+  font-size: 0.85rem;
+  margin-bottom: 0.25rem;
+}
+
+.tour-title-avian {
+  font-size: 1.25rem;
   font-weight: 700;
-  margin-bottom: 1rem;
+  color: #1a1a1a;
+  margin-bottom: 0.25rem;
 }
 
-.tour-route {
-  color: var(--text-secondary);
+.tour-subtitle-avian {
+  color: #555555;
   font-size: 0.95rem;
-  margin-bottom: 1.5rem;
-  flex-grow: 1;
+  margin-bottom: 0.5rem;
 }
 
-.tour-footer {
-  display: flex;
-  justify-content: space-between;
+.tour-divider-avian {
+  border: 0;
+  border-top: 1px solid #eeeeee;
+  margin: 0.5rem 0;
+}
+
+.tour-save-badge {
+  display: inline-flex;
   align-items: center;
-  margin-top: auto;
-  padding-top: 1.5rem;
-  border-top: var(--border-light);
-}
-
-.tour-price-box {
-  display: flex;
-  flex-direction: column;
-}
-
-.tour-price-label {
+  gap: 0.25rem;
+  color: #2e7d32;
+  border: 1px solid #4caf50;
+  background-color: #f1f8e9;
+  padding: 4px 10px;
+  border-radius: 6px;
   font-size: 0.8rem;
-  color: var(--text-light);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-weight: 600;
+  width: fit-content;
+  margin-bottom: 0.5rem;
 }
 
-.tour-price {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--text-primary);
+.tour-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.tour-price-avian {
+  color: #e53935;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.tour-price-strike {
+  color: #888888;
+  font-size: 0.9rem;
+  text-decoration: line-through;
 }
 
 /* Footer */
@@ -491,6 +607,166 @@ textarea.form-control {
   padding: 1rem;
   text-align: left;
   border-bottom: var(--border-light);
+}
+
+/* --- Avian OTP Login Modal Styles --- */
+.login-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.login-modal-content {
+  background: white;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  position: relative;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.login-close-btn {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  color: #333;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.login-logo {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.login-welcome {
+  color: #555;
+  font-size: 1.1rem;
+  margin-bottom: 0.25rem;
+}
+
+.login-brand {
+  color: #1a1a1a;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: #888;
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+}
+.login-divider::before, .login-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #ddd;
+}
+.login-divider span {
+  padding: 0 10px;
+}
+
+.login-error {
+  color: #e5232a;
+  background: #fdeaea;
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.phone-input-group {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 0 1rem;
+  margin-bottom: 1.5rem;
+  transition: border-color 0.2s;
+}
+.phone-input-group:focus-within {
+  border-color: #e5232a;
+}
+
+.country-code {
+  color: #1a1a1a;
+  font-weight: 500;
+  padding-right: 0.75rem;
+  border-right: 1px solid #eee;
+}
+
+.phone-input {
+  flex: 1;
+  border: none;
+  padding: 0.8rem 0.75rem;
+  font-size: 1rem;
+  outline: none;
+  background: transparent;
+}
+.phone-input::placeholder {
+  color: #aaa;
+}
+
+.login-continue-btn {
+  background-color: #e5232a;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  width: 100%;
+  padding: 0.9rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.login-continue-btn:hover {
+  background-color: #c41e24;
+}
+.login-continue-btn:disabled {
+  background-color: #f28b8e;
+  cursor: not-allowed;
+}
+
+.login-footer {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #666;
+}
+.login-links {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+.login-links a {
+  color: #666;
+  text-decoration: underline;
+}
+.login-links a:hover {
+  color: #1a1a1a;
 }
 
 .admin-table th {

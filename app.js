@@ -44,6 +44,7 @@ app.use('/api/v1/tours', tourRoutes);
 app.use('/api/v1/inquiries', inquiryRoutes);
 app.use('/api/v1/reviews', reviewRoutes);
 app.use('/api/v1/amenities', require('./routes/amenities'));
+app.use('/api/v1/locations', require('./routes/locationRoutes'));
 
 // Error Handler Middleware
 

@@ -3,6 +3,7 @@
 ![Node.js](https://img.shields.io/badge/node.js-20+-green.svg)
 ![React](https://img.shields.io/badge/react-19+-blue.svg)
 ![MongoDB](https://img.shields.io/badge/mongodb-Atlas-green.svg)
+![Docker](https://img.shields.io/badge/docker-compose-blue.svg)
 
 ## Overview
 
@@ -17,6 +18,7 @@
 
 ### Content Management System (CMS)
 - **Create Tour Packages** - Admins can create detailed travel itineraries and packages
+- **Dynamic Content** - Manage modular features like Amenities (with SVG icons) and Locations
 - **Image Uploads** - Seamless local image uploading using Multer
 - **Package Management** - Complete lifecycle management of tour offerings
 - **Reviews & Ratings** - Dedicated system for user feedback and ratings
@@ -74,6 +76,7 @@ frontend/src/
 ### Development Tools
 - **Nodemon** - Development server monitoring
 - **Git** - Version control
+- **Docker** - Containerization with `docker-compose`
 
 ## Application Features in Detail
 
@@ -105,6 +108,18 @@ frontend/src/
 - **Input Validation** - express-mongo-sanitize for NoSQL injection prevention
 - **XSS Protection** - xss-clean to sanitize user input
 - **Environment Variables** - Secure configuration management
+
+## 🐳 Running with Docker
+
+You can easily run the backend environment using Docker Compose:
+
+1. Clone the repository
+2. Ensure you have your `.env` file set up in the root directory
+3. Run the following command:
+   ```bash
+   docker-compose up --build -d
+   ```
+This will containerize the Node.js API and expose it on port `5000`.
 
 ## Contributing
 
