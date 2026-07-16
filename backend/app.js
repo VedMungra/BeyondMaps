@@ -6,7 +6,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const helmet = require('helmet');
 
 // Load env vars
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
 
 // Route files
 const authRoutes = require('./routes/authRoutes');
