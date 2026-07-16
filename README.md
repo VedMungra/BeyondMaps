@@ -82,23 +82,48 @@ frontend/src/
 
 ### User Roles & Permissions
 
-**Traveler (User):**
-- Browse tour packages
-- View detailed itineraries
-- Submit travel inquiries
-- Read reviews
+**Traveler (Customer):**
+- **Browse Packages**: 
+  - Dynamically explore a wide variety of different tour packages.
+  - Filter and search destinations based on specific geographical locations.
+  - View real-time availability and categorized trip types.
+- **Detailed Itineraries**: 
+  - Access comprehensive day-by-day schedules and planned activities.
+  - Explore featured local attractions and points of interest.
+  - Analyze transparent pricing structures and immersive, high-resolution photo galleries.
+- **Inquiry Submission**: 
+  - Send customized travel inquiries attached directly to specific tour packages.
+  - Provide contact details and custom messages to initiate the booking process.
+- **Review System**: 
+  - Submit honest ratings and written feedback for completed tours.
+  - Read aggregated reviews from previous travelers to make informed decisions.
 
 **Admin:**
-- Complete platform oversight
-- Manage tour packages (CRUD operations)
-- Review and respond to inquiries
-- Manage user access
+- **Platform Oversight**: 
+  - Access a secure, JWT-authenticated administrative dashboard.
+  - Oversee all platform metrics, active packages, and pending leads from a centralized hub.
+- **Tour Management**: 
+  - Complete CRUD (Create, Read, Update, Delete) capabilities for all tour packages.
+  - Securely upload, replace, or remove single cover images and full photo galleries via Multer.
+  - Write and format rich-text descriptions for daily itineraries.
+- **Dynamic Content Control**: 
+  - Manage standalone database entities like "Locations" and "Amenities" independently.
+  - Link multiple dynamic amenities and locations to tours without touching frontend code.
+- **Lead Management**: 
+  - Track incoming customer inquiries in real-time.
+  - Review customer contact info, respond to leads, and manage the booking pipeline.
 
 ### Tour Lifecycle
-1. **Creation** - Admin creates a tour package with details and images
-2. **Active** - Tour is published and visible to travelers
-3. **Inquiry** - Interested users submit inquiries
-4. **Follow-up** - Admins handle leads and assist with bookings
+- **1. Creation**: Admins construct a new tour package, assign appropriate dynamic locations and amenities, and upload visual assets.
+- **2. Active Deployment**: The tour is published to the MongoDB database and immediately rendered on the React frontend for travelers.
+- **3. Inquiry Generation**: Interested users find the tour and submit inquiries, triggering internal server workflows.
+- **4. Follow-up & Conversion**: Admins handle the captured leads via the dashboard, assist with final bookings, and communicate with the travelers.
+
+### Core Systems
+- **Automated Email Notifications**: 
+  - Integrated with Nodemailer to dispatch transactional emails.
+  - Sends immediate confirmations to users upon inquiry submission and alerts admins of new leads.
+- **File Management**: Local secure image uploading managed by Multer, supporting both single photos and gallery arrays.
 
 ## Security Features
 
@@ -128,9 +153,3 @@ This will containerize the Node.js API and expose it on port `5000`.
 3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
-
-## Support & Contact
-
-For support, questions, or contributions, please contact:
-- Name: Ved Mungra
-- GitHub: [https://github.com/VedMungra](https://github.com/VedMungra)
