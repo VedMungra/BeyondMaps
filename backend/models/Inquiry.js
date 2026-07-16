@@ -22,6 +22,11 @@ const InquirySchema = new mongoose.Schema({
         ref: 'TourPackage',
         required: false // Optional, can be a general inquiry
     },
+    user: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        required: false // Only set when the inquiry was submitted by a logged-in customer
+    },
     status: {
         type: String,
         enum: ['Pending', 'Contacted', 'Closed'],
@@ -32,5 +37,8 @@ const InquirySchema = new mongoose.Schema({
         default: Date.now
     }
 });
+
+// Speeds up the admin lead-pipeline view, which filters/groups by status
+InquirySchema.index({ status: 1 });
 
 module.exports = mongoose.model('Inquiry', InquirySchema);

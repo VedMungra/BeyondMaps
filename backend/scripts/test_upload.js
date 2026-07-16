@@ -1,5 +1,7 @@
 const fs = require('fs');
 const path = require('path');
+const dotenv = require('dotenv');
+dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
 
 const baseUrl = 'http://localhost:5000/api/v1';
 
@@ -19,7 +21,7 @@ async function runUploadTest() {
         const registerRes = await fetch(`${baseUrl}/auth/register`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: 'Upload Tester', email: 'uploader' + Date.now() + '@travel.com', password: 'password123' })
+            body: JSON.stringify({ name: 'Upload Tester', email: 'uploader' + Date.now() + '@travel.com', password: 'password123', registrationKey: process.env.ADMIN_REGISTER_KEY })
         });
         const registerData = await registerRes.json();
         const token = registerData.token;

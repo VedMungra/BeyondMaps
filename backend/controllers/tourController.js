@@ -1,6 +1,12 @@
 const TourPackage = require('../models/TourPackage');
 const ErrorResponse = require('../utils/errorResponse');
 const asyncHandler = require('../middleware/async');
+const upload = require('../middleware/upload');
+
+// Cloudinary storage sets file.path to the hosted image URL; local disk storage sets
+// file.path to a local filesystem path, so file.filename (just the bare name) is what
+// the frontend's /uploads/<filename> route expects instead.
+const fileRef = (file) => (upload.usingCloudinary ? file.path : file.filename);
 
 // @desc    Get all tour packages
 // @route   GET /api/v1/tours
@@ -67,8 +73,8 @@ exports.tourPhotoUpload = asyncHandler(async (req, res, next) => {
         return next(new ErrorResponse(`Please upload a file`, 400));
     }
 
-    // Update the database with the file name
-    tour = await TourPackage.findByIdAndUpdate(req.params.id, { photo: req.file.filename }, {
+    // Update the database with the file name (or Cloudinary URL)
+    tour = await TourPackage.findByIdAndUpdate(req.params.id, { photo: fileRef(req.file) }, {
         returnDocument: 'after',
         runValidators: true
     });
@@ -93,7 +99,7 @@ exports.tourGalleryUpload = asyncHandler(async (req, res, next) => {
         return next(new ErrorResponse(`Please upload at least one file`, 400));
     }
 
-    const fileNames = req.files.map(file => file.filename);
+    const fileNames = req.files.map(fileRef);
 
     tour = await TourPackage.findByIdAndUpdate(req.params.id, { gallery: fileNames }, {
         returnDocument: 'after',
@@ -125,7 +131,7 @@ exports.tourPackageOptionPhotoUpload = asyncHandler(async (req, res, next) => {
         return next(new ErrorResponse(`Package option not found at index ${optionIndex}`, 404));
     }
 
-    tour.packageOptions[optionIndex].image = req.file.filename;
+    tour.packageOptions[optionIndex].image = fileRef(req.file);
     await tour.save();
 
     res.status(200).json({

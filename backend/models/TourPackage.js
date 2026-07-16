@@ -118,4 +118,7 @@ const TourPackageSchema = new mongoose.Schema({
     }
 });
 
+// Speeds up the common browse/filter queries (Home page category & region filters, trending list)
+TourPackageSchema.index({ category: 1, region: 1, isTrending: 1 });
+
 module.exports = mongoose.model('TourPackage', TourPackageSchema);

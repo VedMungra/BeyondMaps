@@ -7,7 +7,19 @@ const { generateToken } = require('../utils/jwt');
 // @route   POST /api/v1/auth/register
 // @access  Public (or Private depending on requirements)
 exports.register = asyncHandler(async (req, res, next) => {
-    const { name, email, password } = req.body;
+    const { name, email, password, registrationKey } = req.body;
+
+    // Registration is gated by a server-side secret (ADMIN_REGISTER_KEY) rather than
+    // requiring an existing admin token, so the very first admin can still be bootstrapped
+    // without a chicken-and-egg problem - but a public, unauthenticated caller cannot mint
+    // themselves an admin account without knowing this out-of-band secret.
+    if (!process.env.ADMIN_REGISTER_KEY) {
+        return next(new ErrorResponse('Admin registration is not configured on this server', 500));
+    }
+
+    if (!registrationKey || registrationKey !== process.env.ADMIN_REGISTER_KEY) {
+        return next(new ErrorResponse('Invalid or missing registration key', 401));
+    }
 
     // Create user
     const user = await AdminUser.create({

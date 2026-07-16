@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import DestinationsBar from '../components/DestinationsBar'
+import { resolveImageUrl } from '../utils/resolveImageUrl'
 
 // Image Slider Component for Tour Card
 const TourCardImageSlider = ({ tour }) => {
@@ -25,7 +26,7 @@ const TourCardImageSlider = ({ tour }) => {
   return (
     <div className="tour-img-wrapper" style={{ position: 'relative' }}>
       <img
-        src={images[currentIndex] ? (images[currentIndex].startsWith('http') ? images[currentIndex] : `/uploads/${images[currentIndex]}`) : 'https://images.unsplash.com/photo-1527631746610-bca00a040d60?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'}
+        src={images[currentIndex] ? resolveImageUrl(images[currentIndex]) : 'https://images.unsplash.com/photo-1527631746610-bca00a040d60?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'}
         alt={tour.title}
         className="tour-img"
         onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1527631746610-bca00a040d60?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80' }}

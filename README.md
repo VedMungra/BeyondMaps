@@ -12,24 +12,28 @@
 ## Key Features
 
 ### Authentication & User Management
-- **User Registration & Login** - Secure authentication with JWT
-- **Role-Based Access Control** - Admin and regular user roles with specific permissions
+- **Two separate auth systems, matched to two different trust levels:**
+  - **Admins** log in with email/password (JWT-based). Registration is gated behind a server-side `ADMIN_REGISTER_KEY` secret, not open to the public.
+  - **Customers** log in with just a phone number via Firebase Phone Authentication (OTP) - no password required. The backend verifies the Firebase ID token server-side before issuing its own JWT.
+- **Role-Based Access Control** - Admin and customer roles with fully separate, independently-protected route middleware
 - **Admin Dashboard** - Complete administrative control over platform content
+- **Customer Account Page** (`/account`) - Logged-in customers can view their own submitted inquiries and status
 
 ### Content Management System (CMS)
 - **Create Tour Packages** - Admins can create detailed travel itineraries and packages
 - **Dynamic Content** - Manage modular features like Amenities (with SVG icons) and Locations
-- **Image Uploads** - Seamless local image uploading using Multer
+- **Image Uploads** - Cloudinary-backed uploads when configured, with automatic fallback to local disk storage otherwise
 - **Package Management** - Complete lifecycle management of tour offerings
 - **Reviews & Ratings** - Dedicated system for user feedback and ratings
 
 ### Customer Engagement
-- **Inquiry System** - Users can submit travel inquiries for specific tours
-- **Automated Emails** - Email notifications via Nodemailer
-- **Lead Generation** - Structured handling of prospective traveler data
+- **Inquiry System** - Users can submit travel inquiries for specific tours, optionally linked to their account if logged in
+- **Automated Emails** - Email notifications via Nodemailer, sent on inquiry submission
+- **Lead Generation** - Structured handling of prospective traveler data through a `Pending -> Contacted -> Closed` pipeline
 
 ### Other Features
-- **Advanced Security** - Built-in protection against XSS, NoSQL Injection, and HTTP Parameter Pollution
+- **Advanced Security** - Protection against XSS, NoSQL Injection, and HTTP Parameter Pollution, all verified compatible with Express 5's stricter request object model
+- **Rate Limiting** - Throttled login and inquiry-submission endpoints to blunt credential-stuffing and lead-form spam
 - **CORS Configuration** - Secure cross-origin resource sharing
 - **Responsive UI** - Dynamic and fast React interface
 
@@ -62,16 +66,20 @@ frontend/src/
 - **Node.js 20+** - JavaScript runtime
 - **Express.js 5** - Web framework
 - **MongoDB + Mongoose** - Database and ODM
-- **JWT Authentication** - Secure token-based authentication
+- **JWT Authentication** - Secure token-based authentication (separate schemes for admins and customers)
+- **Firebase Admin SDK** - Server-side verification of customer phone/OTP login
 - **bcryptjs** - Password hashing
-- **Multer** - File uploading
+- **Multer + Cloudinary** - File uploading, with local disk fallback if Cloudinary isn't configured
 - **Nodemailer** - Email service
-- **Helmet & XSS-Clean** - Advanced API security
+- **express-rate-limit** - Login and inquiry-submission throttling
+- **Helmet, HPP & XSS-Clean** - Advanced API security
+- **express-mongo-sanitize** - NoSQL injection prevention
 
 ### Frontend Technologies
 - **React 19** - UI library
 - **Vite** - Build tool and dev server
 - **React Router 7** - Client-side routing
+- **Firebase (client SDK)** - Phone number + OTP authentication for customers
 
 ### Development Tools
 - **Nodemon** - Development server monitoring
@@ -83,6 +91,9 @@ frontend/src/
 ### User Roles & Permissions
 
 **Traveler (Customer):**
+- **Passwordless Login**:
+  - Log in with just a phone number - Firebase handles the OTP delivery and anti-bot verification.
+  - The backend verifies the Firebase ID token server-side before creating an account and issuing its own JWT.
 - **Browse Packages**: 
   - Dynamically explore a wide variety of different tour packages.
   - Filter and search destinations based on specific geographical locations.
@@ -94,6 +105,9 @@ frontend/src/
 - **Inquiry Submission**: 
   - Send customized travel inquiries attached directly to specific tour packages.
   - Provide contact details and custom messages to initiate the booking process.
+  - If logged in, the inquiry is automatically linked to the customer's account.
+- **My Inquiries**:
+  - Logged-in customers can view every inquiry they've submitted and its current status on a dedicated account page.
 - **Review System**: 
   - Submit honest ratings and written feedback for completed tours.
   - Read aggregated reviews from previous travelers to make informed decisions.
@@ -101,6 +115,7 @@ frontend/src/
 **Admin:**
 - **Platform Oversight**: 
   - Access a secure, JWT-authenticated administrative dashboard.
+  - Registration is gated behind a server-side secret key, not open to the public.
   - Oversee all platform metrics, active packages, and pending leads from a centralized hub.
 - **Tour Management**: 
   - Complete CRUD (Create, Read, Update, Delete) capabilities for all tour packages.
@@ -127,12 +142,32 @@ frontend/src/
 
 ## Security Features
 
-- **JWT Authentication** - Secure token-based authentication
+- **JWT Authentication** - Separate token schemes for admins and customers, each with their own route-protection middleware
+- **Gated Admin Registration** - Creating an admin account requires a server-side `ADMIN_REGISTER_KEY` secret; the endpoint refuses to work at all if that key isn't configured
 - **Password Hashing** - bcryptjs for secure password storage
+- **Rate Limiting** - Login endpoints and inquiry submission are throttled per client IP
 - **CORS Protection** - Configured cross-origin resource sharing
 - **Input Validation** - express-mongo-sanitize for NoSQL injection prevention
 - **XSS Protection** - xss-clean to sanitize user input
-- **Environment Variables** - Secure configuration management
+- **HTTP Parameter Pollution Protection** - hpp guards against duplicate/array query parameters being used to bypass validation
+- **Environment Variables** - Secure configuration management, with sensible fallbacks (e.g. local disk storage when Cloudinary isn't configured) rather than hard failures
+
+## Environment Setup
+
+Copy `.env.example` to `.env` in the repo root and fill in:
+
+| Variable | Required? | Purpose |
+|---|---|---|
+| `MONGO_URI` | Yes | MongoDB connection string |
+| `JWT_SECRET` / `JWT_EXPIRE` | Yes | Signs both admin and customer JWTs |
+| `ADMIN_REGISTER_KEY` | Yes | Required to create an admin account via `POST /api/v1/auth/register` |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` / `FROM_EMAIL` / `FROM_NAME` | Yes, for email | Inquiry confirmation emails (works well with [Mailtrap](https://mailtrap.io)'s free Sandbox for local testing) |
+| `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` | Optional | Enables cloud-hosted photo uploads; falls back to local disk storage if unset |
+
+Additionally, for customer phone/OTP login:
+- Place a Firebase service account key at `backend/firebase-service-account.json` (from Firebase Console -> Project settings -> Service accounts -> Generate new private key).
+- Create `frontend/.env` with `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID`, and `VITE_FIREBASE_APP_ID` (from the same Firebase project's Web app config).
+- Enable the **Phone** sign-in provider in Firebase Console -> Authentication -> Sign-in method, and make sure `localhost` (dev) and your real domain (production) are listed under Authorized domains.
 
 ## 🐳 Running with Docker
 

@@ -1,17 +1,8 @@
 const multer = require('multer');
 const path = require('path');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const ErrorResponse = require('../utils/errorResponse');
-
-// Set storage engine
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, './public/uploads');
-    },
-    filename: function (req, file, cb) {
-        const idStr = req.params.id || req.params.tourId || 'upload';
-        cb(null, `photo_${idStr}_${Date.now()}${path.extname(file.originalname)}`);
-    }
-});
+const { cloudinary, isConfigured: cloudinaryConfigured } = require('../config/cloudinary');
 
 // Check file type
 function checkFileType(file, cb) {
@@ -29,6 +20,30 @@ function checkFileType(file, cb) {
     }
 }
 
+// Cloudinary storage when configured (persists across redeploys/multiple instances),
+// otherwise fall back to the original local disk storage.
+const storage = cloudinaryConfigured
+    ? new CloudinaryStorage({
+        cloudinary,
+        params: {
+            folder: 'beyondmaps/tours',
+            allowed_formats: ['jpg', 'jpeg', 'png'],
+            public_id: (req, file) => {
+                const idStr = req.params.id || req.params.tourId || 'upload';
+                return `photo_${idStr}_${Date.now()}`;
+            }
+        }
+    })
+    : multer.diskStorage({
+        destination: function (req, file, cb) {
+            cb(null, './public/uploads');
+        },
+        filename: function (req, file, cb) {
+            const idStr = req.params.id || req.params.tourId || 'upload';
+            cb(null, `photo_${idStr}_${Date.now()}${path.extname(file.originalname)}`);
+        }
+    });
+
 // Initialize upload
 const upload = multer({
     storage: storage,
@@ -37,5 +52,9 @@ const upload = multer({
         checkFileType(file, cb);
     }
 });
+
+// Lets controllers know whether req.file.path is a Cloudinary URL or a local disk path,
+// since the field that should be persisted to the DB differs between the two.
+upload.usingCloudinary = cloudinaryConfigured;
 
 module.exports = upload;

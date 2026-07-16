@@ -13,7 +13,10 @@ exports.loginUser = asyncHandler(async (req, res, next) => {
         return next(new ErrorResponse('Please provide a Firebase ID token', 400));
     }
 
-    if (!admin) {
+    // config/firebase.js always exports { auth: () => adminAuth }, so `admin` itself is
+    // never falsy - the actual "not configured" signal is admin.auth() returning null
+    // (set only when firebase-service-account.json wasn't found at boot).
+    if (!admin.auth()) {
         return next(new ErrorResponse('Firebase Admin is not configured on the server', 500));
     }
 

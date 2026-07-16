@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import { resolveImageUrl } from '../utils/resolveImageUrl'
 
 const locationImages = {
   'Ahmedabad': 'https://images.unsplash.com/photo-1587315181754-0737a4c7e415?auto=format&fit=crop&w=400&q=80',
@@ -67,11 +68,22 @@ export default function TourDetails() {
     setSubmitting(true)
     setSubmitError('')
 
+    // Computed fresh from current state on every submit, rather than mutated into
+    // formData.message in place - mutating state directly caused the date/traveller
+    // lines to pile up and duplicate on repeated/resubmitted attempts.
+    const dateMsg = inquiryData.date ? `\nTravel Date: ${inquiryData.date}` : ''
+    const paxMsg = inquiryData.travellers ? `\nTravellers: ${inquiryData.travellers}` : ''
+    const fullMessage = (dateMsg || paxMsg) ? `${formData.message}\n${dateMsg}${paxMsg}` : formData.message
+
     try {
+      const userToken = localStorage.getItem('userToken')
       const response = await fetch('/api/v1/inquiries', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, tourPackage: id })
+        headers: {
+          'Content-Type': 'application/json',
+          ...(userToken ? { 'Authorization': `Bearer ${userToken}` } : {})
+        },
+        body: JSON.stringify({ ...formData, message: fullMessage, tourPackage: id })
       })
 
       const data = await response.json()
@@ -305,11 +317,11 @@ export default function TourDetails() {
           <div className="mobile-gallery">
             <div className="gallery-track">
               {/* First slide is always the cover photo */}
-              <img src={`/uploads/${tour.photo}`} alt={`${tour.title} Cover`} className="gallery-slide" />
+              <img src={resolveImageUrl(tour.photo)} alt={`${tour.title} Cover`} className="gallery-slide" />
 
               {/* Remaining slides are gallery photos */}
               {tour.gallery && tour.gallery.map((img, idx) => (
-                <img key={idx} src={`/uploads/${img}`} alt={`${tour.title} ${idx + 1}`} className="gallery-slide" />
+                <img key={idx} src={resolveImageUrl(img)} alt={`${tour.title} ${idx + 1}`} className="gallery-slide" />
               ))}
             </div>
             <div className="gallery-counter">
@@ -322,13 +334,13 @@ export default function TourDetails() {
             <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gridTemplateRows: '250px 250px', gap: '10px', borderRadius: '16px', overflow: 'hidden', height: '510px' }}>
               {/* Big Left Image: Always the Cover Photo */}
               <div style={{ gridColumn: '1 / 2', gridRow: '1 / 3' }}>
-                <img src={`/uploads/${tour.photo}`} alt={`${tour.title} Cover`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img src={resolveImageUrl(tour.photo)} alt={`${tour.title} Cover`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               </div>
               {/* 4 Small Right Images: From the Gallery Array */}
-              <div><img src={tour.gallery && tour.gallery[0] ? `/uploads/${tour.gallery[0]}` : 'https://images.unsplash.com/photo-1527631746610-bca00a040d60?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'} alt={`${tour.title} Gallery 1`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
-              <div><img src={tour.gallery && tour.gallery[1] ? `/uploads/${tour.gallery[1]}` : 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'} alt={`${tour.title} Gallery 2`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
-              <div><img src={tour.gallery && tour.gallery[2] ? `/uploads/${tour.gallery[2]}` : 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'} alt={`${tour.title} Gallery 3`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
-              <div><img src={tour.gallery && tour.gallery[3] ? `/uploads/${tour.gallery[3]}` : 'https://images.unsplash.com/photo-1602002418082-a4443e081dd1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'} alt={`${tour.title} Gallery 4`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
+              <div><img src={tour.gallery && tour.gallery[0] ? resolveImageUrl(tour.gallery[0]) : 'https://images.unsplash.com/photo-1527631746610-bca00a040d60?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'} alt={`${tour.title} Gallery 1`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
+              <div><img src={tour.gallery && tour.gallery[1] ? resolveImageUrl(tour.gallery[1]) : 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'} alt={`${tour.title} Gallery 2`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
+              <div><img src={tour.gallery && tour.gallery[2] ? resolveImageUrl(tour.gallery[2]) : 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'} alt={`${tour.title} Gallery 3`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
+              <div><img src={tour.gallery && tour.gallery[3] ? resolveImageUrl(tour.gallery[3]) : 'https://images.unsplash.com/photo-1602002418082-a4443e081dd1?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80'} alt={`${tour.title} Gallery 4`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /></div>
             </div>
           </div>
         </div>
@@ -536,7 +548,7 @@ export default function TourDetails() {
                           }}
                         >
                           <div style={{ height: '140px', width: '100%', position: 'relative' }}>
-                            <img src={opt.image ? `/uploads/${opt.image}` : '/assets/no-photo.jpg'} alt={opt.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.src = '/assets/default-tour.jpg' }} />
+                            <img src={opt.image ? resolveImageUrl(opt.image) : '/assets/no-photo.jpg'} alt={opt.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => { e.target.src = '/assets/default-tour.jpg' }} />
                             <div style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(0,0,0,0.6)', color: 'white', padding: '0.2rem 0.6rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600 }}>
                               {displayDuration}
                             </div>
@@ -1017,7 +1029,7 @@ export default function TourDetails() {
                         {review.photos.map((photo, idx) => (
                           <img
                             key={idx}
-                            src={`/uploads/${photo}`}
+                            src={resolveImageUrl(photo)}
                             alt={`Review photo ${idx + 1}`}
                             style={{ width: '100%', height: '180px', objectFit: 'cover', borderRadius: '12px' }}
                             onError={(e) => e.target.style.display = 'none'}
@@ -1138,7 +1150,7 @@ export default function TourDetails() {
 
             {/* Left Image Section */}
             <div style={{ flex: 1, position: 'relative', background: 'var(--bg-secondary)', display: 'none' }} className="d-md-block">
-              <img src={`/uploads/${tour.photo}`} alt={tour.title} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }} />
+              <img src={resolveImageUrl(tour.photo)} alt={tour.title} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', top: 0, left: 0 }} />
               <div style={{ position: 'absolute', bottom: 0, left: 0, width: '100%', padding: '2rem', background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)' }}>
                 <div style={{ color: 'white', fontSize: '0.9rem', fontWeight: 600, marginBottom: '0.25rem' }}>{finalDuration}</div>
                 <div style={{ color: 'white', fontSize: '1.5rem', fontWeight: 800 }}>{tour.title}</div>
@@ -1166,15 +1178,7 @@ export default function TourDetails() {
                   <h3 style={{ fontSize: '1.5rem', marginBottom: '2rem', fontWeight: 700 }}>Plan Your Next Trip</h3>
                   {submitError && <div style={{ color: 'red', marginBottom: '1rem', padding: '0.5rem', background: '#ffebee', borderRadius: '8px', fontSize: '0.9rem' }}>{submitError}</div>}
 
-                  <form onSubmit={(e) => {
-                    // Inject travel date and pax into the message if present
-                    const dateMsg = inquiryData.date ? `\nTravel Date: ${inquiryData.date}` : '';
-                    const paxMsg = inquiryData.travellers ? `\nTravellers: ${inquiryData.travellers}` : '';
-                    if (dateMsg || paxMsg) {
-                      formData.message += `\n${dateMsg}${paxMsg}`;
-                    }
-                    handleSubmit(e);
-                  }}>
+                  <form onSubmit={handleSubmit}>
                     <div style={{ marginBottom: '1rem' }}>
                       <input type="text" className="form-control" placeholder="Your Name" required value={formData.name} onChange={handleInputChange} name="name" style={{ borderRadius: '8px' }} />
                     </div>

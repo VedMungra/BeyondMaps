@@ -1,3 +1,7 @@
+const dotenv = require('dotenv');
+const path = require('path');
+dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
+
 const baseUrl = 'http://localhost:5000/api/v1';
 
 async function runTests() {
@@ -11,7 +15,8 @@ async function runTests() {
         body: JSON.stringify({
             name: 'Test Admin',
             email: 'admin' + Date.now() + '@travel.com', // Unique email every run
-            password: 'password123'
+            password: 'password123',
+            registrationKey: process.env.ADMIN_REGISTER_KEY
         })
     });
     const registerData = await registerRes.json();

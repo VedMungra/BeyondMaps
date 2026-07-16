@@ -1,14 +1,17 @@
 const express = require('express');
-const { getInquiries, createInquiry, updateInquiry } = require('../controllers/inquiryController');
+const { getInquiries, createInquiry, updateInquiry, getMyInquiries } = require('../controllers/inquiryController');
 
-const { protect } = require('../middleware/auth');
+const { protect, protectUser, attachCustomerIfPresent } = require('../middleware/auth');
+const { inquiryLimiter } = require('../middleware/rateLimit');
 
 const router = express.Router();
 
 router
     .route('/')
     .get(protect, getInquiries)
-    .post(createInquiry);
+    .post(inquiryLimiter, attachCustomerIfPresent, createInquiry);
+
+router.route('/mine').get(protectUser, getMyInquiries);
 
 router
     .route('/:id')
